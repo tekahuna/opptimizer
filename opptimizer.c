@@ -1,16 +1,17 @@
 /*
- opperator.ko - The OPP Mannagement API
+ opptimizer.ko - The OPP Mannagement API
  version 0.1-beta1 - 12-14-11
  by Jeffrey Kawika Patricio <jkp@tekahuna.net>
  License: GNU GPLv3
  <http://www.gnu.org/licenses/gpl-3.0.html>
  
  Project site:
- http://code.google.com/p/opperator/
+ http://code.google.com/p/opptimizer/
  
  Changelog:
  
  version 0.1-beta1 - 12-14-11
+ - Renamed to OPPtimizer
  - Cleaned up code to work on OMAP2+ w/kernel 2.6.35-7 and greater
  - Build System
  
@@ -30,8 +31,8 @@
 #include "../symsearch/symsearch.h"
 
 #define DRIVER_AUTHOR "Jeffrey Kawika Patricio <jkp@tekahuna.net>\n"
-#define DRIVER_DESCRIPTION "opperator.ko - The OPP Management API\n\
-code.google.com/p/opperator for more info\n\
+#define DRIVER_DESCRIPTION "opptimizer.ko - The OPP Management API\n\
+code.google.com/p/opptimizer for more info\n\
 This modules makes use of SYMSEARCH by Skrilax_CZ\n\
 Inspire by Milestone Overclock by Tiago Sousa\n"
 #define DRIVER_VERSION "0.1-beta1"
@@ -89,7 +90,7 @@ struct device_opp {
 	unsigned long (*get_rate) (struct device *dev);
 };
 
-static int proc_opperator_read(char *buffer, char **buffer_location,
+static int proc_opptimizer_read(char *buffer, char **buffer_location,
 							  off_t offset, int count, int *eof, void *data)
 {
 	int ret = 0;
@@ -111,7 +112,7 @@ static int proc_opperator_read(char *buffer, char **buffer_location,
 	return ret;
 };
 
-static int proc_opperator_write(struct file *filp, const char __user *buffer,
+static int proc_opptimizer_write(struct file *filp, const char __user *buffer,
 						 unsigned long len, void *data)
 {
 	unsigned long rate, freq = ULONG_MAX;
@@ -137,11 +138,11 @@ static int proc_opperator_write(struct file *filp, const char __user *buffer,
 		freq_table[maxdex].frequency = policy->max = policy->cpuinfo.max_freq =
 			policy->user_policy.max = rate / 1000;
 	} else
-		printk(KERN_INFO "OPPerator: incorrect parameters\n");
+		printk(KERN_INFO "opptimizer: incorrect parameters\n");
 	return len;
 };
 							 
-static int __init opperator_init(void)
+static int __init opptimizer_init(void)
 {
 	unsigned long freq = ULONG_MAX;
 	struct device *dev;
@@ -151,8 +152,8 @@ static int __init opperator_init(void)
 	printk(KERN_INFO " %s %s\n", DRIVER_DESCRIPTION, DRIVER_VERSION);
 	printk(KERN_INFO " Created by %s\n", DRIVER_AUTHOR);
 
-	SYMSEARCH_BIND_FUNCTION_TO(opperator, opp_get_opp_count, opp_get_opp_count_fp);
-	SYMSEARCH_BIND_FUNCTION_TO(opperator, opp_find_freq_floor, opp_find_freq_floor_fp);
+	SYMSEARCH_BIND_FUNCTION_TO(opptimizer, opp_get_opp_count, opp_get_opp_count_fp);
+	SYMSEARCH_BIND_FUNCTION_TO(opptimizer, opp_find_freq_floor, opp_find_freq_floor_fp);
 	
 	freq_table = cpufreq_frequency_get_table(0);
 	policy = cpufreq_cpu_get(0);
@@ -168,19 +169,19 @@ static int __init opperator_init(void)
 	
 	buf = (char *)vmalloc(BUF_SIZE);
 	
-	proc_entry = create_proc_read_entry("opperator", 0644, NULL, proc_opperator_read, NULL);
-	proc_entry->write_proc = proc_opperator_write;
+	proc_entry = create_proc_read_entry("opptimizer", 0644, NULL, proc_opptimizer_read, NULL);
+	proc_entry->write_proc = proc_opptimizer_write;
 	
 	return 0;
 };
 
-static void __exit opperator_exit(void)
+static void __exit opptimizer_exit(void)
 {
 	unsigned long freq = ULONG_MAX;
 	struct device *dev;
 	struct omap_opp *opp;
 	
-	remove_proc_entry("opperator", NULL);
+	remove_proc_entry("opptimizer", NULL);
 	
 	vfree(buf);
 	
@@ -194,9 +195,9 @@ static void __exit opperator_exit(void)
 	freq_table[maxdex].frequency = policy->max = policy->cpuinfo.max_freq =
 	policy->user_policy.max = def_max_rate / 1000;
 	
-	printk(KERN_INFO " OPPerator: Reseting values to default... Goodbye!\n");
+	printk(KERN_INFO " opptimizer: Reseting values to default... Goodbye!\n");
 };
 							 
-module_init(opperator_init);
-module_exit(opperator_exit);
+module_init(opptimizer_init);
+module_exit(opptimizer_exit);
 
